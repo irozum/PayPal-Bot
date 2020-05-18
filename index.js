@@ -1,4 +1,3 @@
-const cron = require('node-cron');
 const express = require('express');
 const nodemailer = require('nodemailer');
 const sgTransport = require('nodemailer-sendgrid-transport')
@@ -50,14 +49,17 @@ const getUSDCAD = async (latest = true) => {
   }
 };
 
-const rateToday = getUSDCAD();
-const rateYesterday = getUSDCAD(false);
-if (rateToday < rateYesterday) {
-  sendEmail('Transfer money', 'Time to transfer money from PayPal.');
-  console.log('Time to transfer');
-} else {
-  console.log('Keep on paypal');
+const checkRate = async () => {
+  const rateToday = await getUSDCAD();
+  const rateYesterday = await getUSDCAD(false);
+  console.log(`Yestrday date: ${yesterdayDate()}`)
+  console.log(`Yesterday: ${rateYesterday}, today: ${rateToday}`);
+  if (rateToday < rateYesterday) {
+    sendEmail('Transfer money', 'Time to transfer money from PayPal.');
+  }
 }
+
+checkRate();
 
 
 const PORT = process.env.PORT || 8000
