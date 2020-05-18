@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h1 id="rate"></h1>
+</body>
+</html>
+
+<script>
+  // const rate = document.querySelector('#rate');
+  // const url = 'https://api.exchangeratesapi.io/latest?base=USD'
+
+  // const getUSDCAD = async () => {
+  //   try {
+  //     const response = await fetch(url);
+  //     const data = await response.json();
+  //     rate.innerHTML = data.rates.CAD.toFixed(3);
+  //   } catch (e) {
+  //     console.log(e)
+  //   }
+  // }
+
+  // getUSDCAD();
+
+  // curl -v -X GET https://api.sandbox.paypal.com/v2/wallet/balance-accounts \
+  // -H "Content-Type: application/json" \
+  // -H "Authorization: Bearer Access-Token"
+
+  const url = "https://api.sandbox.paypal.com/v2/wallet/balance-accounts";
+
+  const options = {
+    headers: {
+      'Content-Type': 'application/json', 
+      Authorization: "Bearer 6Q************"
+    }
+  };
+
+  fetch(url, options)
+    .then( res => res.json() )
+    .then( data => console.log(data) );
+</script>
