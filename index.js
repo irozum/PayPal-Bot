@@ -1,7 +1,7 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
-require('dotenv').config({ path: ".env" })
-const sgTransport = require('nodemailer-sendgrid-transport')
+require('dotenv').config({ path: ".env" });
+const sgTransport = require('nodemailer-sendgrid-transport');
 const fetch = require("node-fetch");
 const Paypal = require('paypal-nvp-api');
 
@@ -9,7 +9,7 @@ app = express();
 
 app.get('/', (req, res) => {
   return res.send('hello');
-})
+});
 
 const sendEmail = (subject, text) => {
   const email = {
@@ -19,24 +19,24 @@ const sendEmail = (subject, text) => {
     subject,
     text
   };
-  
+
   const options = {
     auth: {
-        api_key: process.env.SG_KEY
+      api_key: process.env.SG_KEY
     }
-  }
-  const mailer = nodemailer.createTransport(sgTransport(options));   
-  
-  mailer.sendMail(email, (err, res)=>{
+  };
+  const mailer = nodemailer.createTransport(sgTransport(options));
+
+  mailer.sendMail(email, (err, res) => {
     if (err) console.log(err);
-  })
+  });
 };
 
 const yesterdayDate = () => {
   const date = new Date();
   date.setDate(date.getDate() - 1);
   return JSON.stringify(date).substr(1, 10);
-}
+};
 
 const getUSDCAD = async (latest = true) => {
   const date = latest ? 'latest' : yesterdayDate();
@@ -57,8 +57,8 @@ const getPPBalance = async () => {
     username: process.env.PP_USERNAME,
     password: process.env.PP_PASSWORD,
     signature: process.env.PP_SIGNATURE
-  }
-  
+  };
+
   try {
     const paypal = Paypal(config);
     const result = await paypal.request('GetBalance', {});
@@ -67,23 +67,26 @@ const getPPBalance = async () => {
     console.log('PayPal connection failed: ' + e);
     sendEmail('PayPal connection failed', e);
   }
-}
+};
 
 const checkRate = async () => {
-  const PayPalBalance = await getPPBalance();
-  if (PayPalBalance > 0) {
-    const rateToday = await getUSDCAD();
-    const rateYesterday = await getUSDCAD(false);
-    console.log(`Yestrday date: ${yesterdayDate()}`)
-    console.log(`Yesterday: ${rateYesterday}, today: ${rateToday}`);
-    if (rateToday < rateYesterday) {
-      sendEmail('Transfer money', 'Time to transfer money from PayPal.');
+  const date = (new Date()).getDate();
+  if (date < 28) {
+    const PayPalBalance = await getPPBalance();
+    if (PayPalBalance > 0) {
+      const rateToday = await getUSDCAD();
+      const rateYesterday = await getUSDCAD(false);
+      console.log(`Yestrday date: ${yesterdayDate()}`);
+      console.log(`Yesterday: ${rateYesterday}, today: ${rateToday}`);
+      if (rateToday < rateYesterday) {
+        sendEmail('Transfer money', 'Time to transfer money from PayPal.');
+      }
     }
   }
-}
+};
 
 checkRate();
 
 
-const PORT = process.env.PORT || 8000
-app.listen(PORT, () => console.log(`App has been connected to the port ${PORT}`))
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => console.log(`App has been connected to the port ${PORT}`));
